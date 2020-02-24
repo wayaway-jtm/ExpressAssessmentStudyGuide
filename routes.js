@@ -1,4 +1,4 @@
-//import { isNull, isNullOrUndefined, isUndefined } from 'util';
+"use strict";
 const util = require('util');
 const express = require('express');
 const routes = express.Router();
@@ -66,8 +66,9 @@ routes.get('/students/lastname/:lastname', (req, res) => {
 });
 
 routes.put('/students/:id', (req, res) => {
-    let targetId = parseInt(req.params.id) - 1;
-    if (!util.isUndefined(students[targetId])) {
+    let targetId = parseInt(req.params.id);
+    let targetStudent = findStudent(req.params.id);
+    if (!util.isUndefined(targetStudent)) {
         let newFirstName = req.body.firstName;
         let newLastName = req.body.lastName;
         if (!util.isNullOrUndefined(newFirstName)) {
@@ -76,7 +77,7 @@ routes.put('/students/:id', (req, res) => {
         if (!util.isNullOrUndefined(newLastName)) {
             students[targetId].lastName = newLastName;
         }
-        res.status(200).json(students[targetId]);
+        res.status(200).json(students.find(s => s.id === targetId));
     } else {
         res.status(404).json(`No student with id ${req.params.id} found`);
     }
@@ -86,8 +87,9 @@ routes.post('/students', (req, res) => {
     let newId = nextId++;
     let newFirstName = req.body.firstName;
     let newLastName = req.body.lastName;
-    if (!util.isUndefined(students[newId])) {
-        res.status(409).end();
+    let targetStudent = findStudent(newId);
+    if (!util.isUndefined(targetStudent)) {
+        res.status(409).json(`Student with id ${newId} already exists`);
     } else if (util.isNullOrUndefined(newId)) {
         res.status(400).json('No ID provided');
     } else if (util.isNullOrUndefined(newFirstName)) {
@@ -95,26 +97,38 @@ routes.post('/students', (req, res) => {
     } else if (util.isNullOrUndefined(newLastName)) {
         res.status(400).json('No last name provided');
     } else {
-        students[newId] = {
+        students.push({
             id: newId,
             firstName: newFirstName,
             lastName: newLastName
-        };
-        res.status(201).json(students); // for testing
-        //res.status(201).end();
+        });
+        //res.status(201).json(students); // for testing
+        res.status(201).json(students.find(x => x.id === newId));
     }
 });
 
 routes.delete('/students/:id', (req, res) => {
     let targetId = req.params.id;
+    let targetStudent = findStudent(targetId)
     if (util.isNullOrUndefined(targetId)) {
         res.status(400).json('No ID provided');
-    } else if (util.isNullOrUndefined(students[targetId])) {
+    } else if (util.isNullOrUndefined(targetStudent)) {
         res.status(400).json(`No student found with ID = ${targetId}`);
     } else {
         let deletedStudent = students.splice(targetId - 1, 1);
         res.status(200).json(deletedStudent);
     }
 });
+
+function findStudent(targetId) {
+    let targetStudent;
+    for (const student of students) {
+        if (student.id == targetId) {
+            targetStudent = student;
+            break;
+        }
+    }
+    return targetStudent;
+}
 
 module.exports = routes;

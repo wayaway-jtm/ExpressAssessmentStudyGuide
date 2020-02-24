@@ -66,7 +66,7 @@ routes.get('/students/lastname/:lastname', (req, res) => {
 });
 
 routes.put('/students/:id', (req, res) => {
-    let targetId = req.params.id;
+    let targetId = parseInt(req.params.id) - 1;
     if (!util.isUndefined(students[targetId])) {
         let newFirstName = req.body.firstName;
         let newLastName = req.body.lastName;
@@ -78,7 +78,7 @@ routes.put('/students/:id', (req, res) => {
         }
         res.status(200).json(students[targetId]);
     } else {
-        res.status(404).end();
+        res.status(404).json(`No student with id ${req.params.id} found`);
     }
 });
 

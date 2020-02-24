@@ -39,8 +39,8 @@ routes.get('/students', (req, res) => {
 routes.get('/students/:id', (req, res) => {
     let targetId = parseInt(req.params.id);
     let foundStudent = false;
-    for (const studentId in students) {
-        if (studentId == targetId) {
+    for (const student of students) {
+        if (student.id == targetId) {
             foundStudent = true;
             res.status(200).json(students[targetId]);
         }
@@ -50,11 +50,10 @@ routes.get('/students/:id', (req, res) => {
     }
 });
 
-routes.get('/students/last-name/:last-name', (req, res) => {
-    console.log(`Looking for student ${req/params.last-name}`);
+routes.get('/students/lastname/:lastname', (req, res) => {
     let resArray = [];
-    for (const student in students) {
-        if (student.lastName.toString().toLowerCase() == req.params.last-name.toLowerCase()) {
+    for (const student of students) {
+        if (student.lastName.toString().toLowerCase() == req.params.lastname.toLowerCase()) {
             resArray.push(student);
         }
     }
